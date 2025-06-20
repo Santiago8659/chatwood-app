@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Órdenes del Cliente</title>
+    <style>
+        body { font-family: sans-serif; margin: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th { background-color: #f4f4f4; }
+        #orders-container { min-height: 2rem; }
+    </style>
+</head>
+<body>
+    <h2>Órdenes del Cliente</h2>
+    <div id="orders-container">Cargando órdenes…</div>
+
+    <script>
+    let appContext = null;
+    console.log("Cargando órdenes del cliente...");
+    console.log("Iniciando solicitud a la API...");
+    // 1) Escucha los mensajes que envía Chatwoot con el contexto
+    window.addEventListener("message", (event) => {
+        try {
+            const payload = JSON.parse(event.data);
+            if (payload.event === "appContext") {
+            appContext = payload.data;
+            console.log("APP")
+            console.log(appContext);
+            <!-- cargarOrdenes(); -->
+            }
+        } catch (e) {
+            // no es nuestro mensaje
+        }
+        });
+    </script>
+</body>
+</html>
