@@ -1,38 +1,131 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <title>Órdenes del Cliente</title>
-    <style>
-        body { font-family: sans-serif; margin: 1rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-        th { background-color: #f4f4f4; }
-        #orders-container { min-height: 2rem; }
-    </style>
-</head>
-<body>
-    <h2>Órdenes del Cliente</h2>
-    <div id="orders-container">Cargando órdenes…</div>
-
-    <script>
-    let appContext = null;
-    console.log("Cargando órdenes del cliente...");
-    console.log("Iniciando solicitud a la API...");
-    // 1) Escucha los mensajes que envía Chatwoot con el contexto
-    window.addEventListener("message", (event) => {
-        try {
-            const payload = JSON.parse(event.data);
-            if (payload.event === "appContext") {
-            appContext = payload.data;
-            console.log("APP")
-            console.log(appContext);
-            <!-- cargarOrdenes(); -->
-            }
-        } catch (e) {
-            // no es nuestro mensaje
+conversation object​
+{
+  "meta": {
+    "sender": {
+      "additional_attributes": {
+        "description": "string",
+        "company_name": "string",
+        "social_profiles": {
+          "github": "string",
+          "twitter": "string",
+          "facebook": "string",
+          "linkedin": "string"
         }
-        });
-    </script>
-</body>
-</html>
+      },
+      "availability_status": "string",
+      "email": "string",
+      "id": "integer",
+      "name": "string",
+      "phone_number": "string",
+      "identifier": "string",
+      "thumbnail": "string",
+      "custom_attributes": "object",
+      "last_activity_at": "integer"
+    },
+    "channel": "string",
+    "assignee": {
+      "id": "integer",
+      "account_id": "integer",
+      "availability_status": "string",
+      "auto_offline": "boolean",
+      "confirmed": "boolean",
+      "email": "string",
+      "available_name": "string",
+      "name": "string",
+      "role": "string",
+      "thumbnail": "string"
+    },
+    "hmac_verified": "boolean"
+  },
+  "id": "integer",
+  "messages": [
+    {
+      "id": "integer",
+      "content": "Hello",
+      "inbox_id": "integer",
+      "conversation_id": "integer",
+      "message_type": "integer",
+      "content_type": "string",
+      "content_attributes": {},
+      "created_at": "integer",
+      "private": "boolean",
+      "source_id": "string",
+      "sender": {
+        "additional_attributes": {
+          "description": "string",
+          "company_name": "string",
+          "social_profiles": {
+            "github": "string",
+            "twitter": "string",
+            "facebook": "string",
+            "linkedin": "string"
+          }
+        },
+        "custom_attributes": "object",
+        "email": "string",
+        "id": "integer",
+        "identifier": "string",
+        "name": "string",
+        "phone_number": "string",
+        "thumbnail": "string",
+        "type": "string"
+      }
+    }
+  ],
+  "account_id": "integer",
+  "additional_attributes": {
+    "browser": {
+      "device_name": "string",
+      "browser_name": "string",
+      "platform_name": "string",
+      "browser_version": "string",
+      "platform_version": "string"
+    },
+    "referer": "string",
+    "initiated_at": {
+      "timestamp": "string"
+    }
+  },
+  "agent_last_seen_at": "integer",
+  "assignee_last_seen_at": "integer",
+  "can_reply": "boolean",
+  "contact_last_seen_at": "integer",
+  "custom_attributes": "object",
+  "inbox_id": "integer",
+  "labels": "array",
+  "muted": "boolean",
+  "snoozed_until": null,
+  "status": "string",
+  "timestamp": "integer",
+  "unread_count": "integer",
+  "allMessagesLoaded": "boolean",
+  "dataFetched": "boolean"
+}
+contact object​
+{
+  "additional_attributes": {
+    "description": "string",
+    "company_name": "string",
+    "social_profiles": {
+      "github": "string",
+      "twitter": "string",
+      "facebook": "string",
+      "linkedin": "string"
+    }
+  },
+  "availability_status": "string",
+  "email": "string",
+  "id": "integer",
+  "name": "string",
+  "phone_number": "+91 9000000001",
+  "identifier": "string || null",
+  "thumbnail": "+91 9000000001",
+  "custom_attributes": {},
+  "last_activity_at": "integer"
+}
+currentAgent object​
+{
+  "email": "string",
+  "id": "integer",
+  "name": "string"
+}
