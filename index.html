@@ -1,131 +1,169 @@
-conversation object​
-{
-  "meta": {
-    "sender": {
-      "additional_attributes": {
-        "description": "string",
-        "company_name": "string",
-        "social_profiles": {
-          "github": "string",
-          "twitter": "string",
-          "facebook": "string",
-          "linkedin": "string"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Contextual</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #007bff;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+    header .info {
+      display: flex;
+      flex-direction: column;
+    }
+    header .info .name {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    header .info .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .bubble {
+      max-width: 70%;
+      padding: 0.75rem 1rem;
+      border-radius: 16px;
+      margin-bottom: 0.75rem;
+      position: relative;
+      word-break: break-word;
+    }
+    .bubble.contact {
+      align-self: flex-start;
+      background: #e0e0e0;
+    }
+    .bubble.agent {
+      align-self: flex-end;
+      background: #007bff;
+      color: #fff;
+    }
+    .bubble .meta {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-bottom: 0.25rem;
+    }
+
+    footer {
+      padding: 0.5rem;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header id="contact-header">
+    <img src="" alt="Avatar del contacto" id="contact-thumb" />
+    <div class="info">
+      <div class="name" id="contact-name">Contacto</div>
+      <div class="subtitle" id="contact-email">email@dominio.com</div>
+    </div>
+  </header>
+
+  <div id="chat">
+    <div class="bubble system">Esperando datos del chat…</div>
+  </div>
+
+  <footer>
+    Agente: <span id="agent-name">—</span> | Canal: <span id="channel-name">—</span>
+  </footer>
+
+  <script>
+    let context = null;
+    const chatEl = document.getElementById('chat');
+    const contactThumb = document.getElementById('contact-thumb');
+    const contactName  = document.getElementById('contact-name');
+    const contactEmail = document.getElementById('contact-email');
+    const agentNameEl  = document.getElementById('agent-name');
+    const channelEl    = document.getElementById('channel-name');
+
+    // 1) Escuchar mensaje con appContext
+    window.addEventListener('message', (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'appContext') {
+          context = msg.data;
+          renderHeader();
+          renderFooter();
+          renderMessages();
         }
-      },
-      "availability_status": "string",
-      "email": "string",
-      "id": "integer",
-      "name": "string",
-      "phone_number": "string",
-      "identifier": "string",
-      "thumbnail": "string",
-      "custom_attributes": "object",
-      "last_activity_at": "integer"
-    },
-    "channel": "string",
-    "assignee": {
-      "id": "integer",
-      "account_id": "integer",
-      "availability_status": "string",
-      "auto_offline": "boolean",
-      "confirmed": "boolean",
-      "email": "string",
-      "available_name": "string",
-      "name": "string",
-      "role": "string",
-      "thumbnail": "string"
-    },
-    "hmac_verified": "boolean"
-  },
-  "id": "integer",
-  "messages": [
-    {
-      "id": "integer",
-      "content": "Hello",
-      "inbox_id": "integer",
-      "conversation_id": "integer",
-      "message_type": "integer",
-      "content_type": "string",
-      "content_attributes": {},
-      "created_at": "integer",
-      "private": "boolean",
-      "source_id": "string",
-      "sender": {
-        "additional_attributes": {
-          "description": "string",
-          "company_name": "string",
-          "social_profiles": {
-            "github": "string",
-            "twitter": "string",
-            "facebook": "string",
-            "linkedin": "string"
-          }
-        },
-        "custom_attributes": "object",
-        "email": "string",
-        "id": "integer",
-        "identifier": "string",
-        "name": "string",
-        "phone_number": "string",
-        "thumbnail": "string",
-        "type": "string"
+      } catch (_) {}
+    });
+
+    // 2) Solicitar el contexto a Chatwoot
+    window.parent.postMessage('chatwoot-dashboard-app:fetch-info', '*');
+
+    function renderHeader() {
+      const c = context.contact;
+      contactThumb.src   = c.thumbnail || '';
+      contactName.textContent  = c.name || '—';
+      contactEmail.textContent = c.email || '—';
+    }
+
+    function renderFooter() {
+      agentNameEl.textContent = context.currentAgent.name;
+      channelEl.textContent   = context.conversation.meta.channel;
+    }
+
+    function renderMessages() {
+      chatEl.innerHTML = ''; // limpiar
+      const msgs = context.conversation.messages || [];
+      if (msgs.length === 0) {
+        chatEl.innerHTML = '<div class="bubble system">No hay mensajes aún.</div>';
+        return;
       }
+      msgs.forEach(m => {
+        const bubble = document.createElement('div');
+        // Decide estilo según el sender.type
+        const senderType = m.sender.type; // e.g. "user" o "agent"
+        if (senderType === 'contact' || senderType === 'user') {
+          bubble.className = 'bubble contact';
+        } else {
+          bubble.className = 'bubble agent';
+        }
+        // Meta de mensaje: nombre y fecha
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const fecha = new Date(m.created_at * 1000).toLocaleString();
+        meta.textContent = `${m.sender.name} • ${fecha}`;
+        // Contenido
+        const content = document.createElement('div');
+        content.innerHTML = m.content;
+
+        bubble.appendChild(meta);
+        bubble.appendChild(content);
+        chatEl.appendChild(bubble);
+      });
+      // ir al final
+      chatEl.scrollTop = chatEl.scrollHeight;
     }
-  ],
-  "account_id": "integer",
-  "additional_attributes": {
-    "browser": {
-      "device_name": "string",
-      "browser_name": "string",
-      "platform_name": "string",
-      "browser_version": "string",
-      "platform_version": "string"
-    },
-    "referer": "string",
-    "initiated_at": {
-      "timestamp": "string"
-    }
-  },
-  "agent_last_seen_at": "integer",
-  "assignee_last_seen_at": "integer",
-  "can_reply": "boolean",
-  "contact_last_seen_at": "integer",
-  "custom_attributes": "object",
-  "inbox_id": "integer",
-  "labels": "array",
-  "muted": "boolean",
-  "snoozed_until": null,
-  "status": "string",
-  "timestamp": "integer",
-  "unread_count": "integer",
-  "allMessagesLoaded": "boolean",
-  "dataFetched": "boolean"
-}
-contact object​
-{
-  "additional_attributes": {
-    "description": "string",
-    "company_name": "string",
-    "social_profiles": {
-      "github": "string",
-      "twitter": "string",
-      "facebook": "string",
-      "linkedin": "string"
-    }
-  },
-  "availability_status": "string",
-  "email": "string",
-  "id": "integer",
-  "name": "string",
-  "phone_number": "+91 9000000001",
-  "identifier": "string || null",
-  "thumbnail": "+91 9000000001",
-  "custom_attributes": {},
-  "last_activity_at": "integer"
-}
-currentAgent object​
-{
-  "email": "string",
-  "id": "integer",
-  "name": "string"
-}
+  </script>
+</body>
+</html>
